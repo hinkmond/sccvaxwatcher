@@ -5,17 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.hinkmond</groupId>
-    <artifactId>sccvaxwather</artifactId>
+    <artifactId>sccvaxwatcher</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>br-selenium-java</name>
-    <packaging>war</packaging>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.source>17</maven.compiler.source>
-        <junit.version>5.9.0</junit.version>
-    </properties>
+    <packaging>${artifact-packaging}</packaging>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
@@ -30,16 +23,20 @@
             <version>4.4.0</version>
         </dependency>
         <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-chrome-driver</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -55,11 +52,49 @@
 
     <profiles>
         <profile>
+            <id>assembly-jar</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <maven.compiler.target>17</maven.compiler.target>
+                <maven.compiler.source>17</maven.compiler.source>
+                <junit.version>5.9.0</junit.version>
+                <!-- -->
+                <artifact-packaging>jar</artifact-packaging>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.4.2</version>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.hinkmond.SCCVaxWatcher</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>local-jar</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <maven.compiler.target>17</maven.compiler.target>
+                <maven.compiler.source>17</maven.compiler.source>
+                <junit.version>5.9.0</junit.version>
+                <!-- -->
                 <artifact-packaging>jar</artifact-packaging>
             </properties>
             <build>
@@ -68,6 +103,15 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
                         <version>3.2.2</version>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <classpathPrefix>lib/</classpathPrefix>
+                                    <mainClass>com.hinkmond.SCCVaxWatcher</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -75,6 +119,11 @@
         <profile>
             <id>remote-war</id>
             <properties>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <maven.compiler.target>17</maven.compiler.target>
+                <maven.compiler.source>17</maven.compiler.source>
+                <junit.version>5.9.0</junit.version>
+                <!-- -->
                 <artifact-packaging>war</artifact-packaging>
             </properties>
             <build>
