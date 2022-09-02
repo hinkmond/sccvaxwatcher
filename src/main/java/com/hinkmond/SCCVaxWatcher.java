@@ -6,8 +6,16 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 
 public class SCCVaxWatcher {
     // Expected labels in question
@@ -18,9 +26,24 @@ public class SCCVaxWatcher {
             "I am moderately to severely immunocompromised and I would like to schedule an additional dose to complete my initial series.**"
     };
 
+    /////
+    // Mail settings
+    /////
+    // Recipient's email ID needs to be mentioned.
+    String to = "abcd@gmail.com";
+    // Sender's email ID needs to be mentioned
+    String from = "web@gmail.com";
+    // Assuming you are sending email from localhost
+    String host = "localhost";
+    // Get system properties
+    Properties properties = System.getProperties();
+
+    // Get the default Session object.
+    Session session = Session.getDefaultInstance(properties);
+
     public void watchForVaccine() {
         ChromeOptions chrome_options = new ChromeOptions();
-        chrome_options.addArguments("--window-size=860,620", "--window-position=0,0");
+        chrome_options.addArguments("--headless");
         WebDriver driver = new ChromeDriver(chrome_options);
 
         // Create ChromeDriver window
@@ -37,15 +60,50 @@ public class SCCVaxWatcher {
         System.err.println("Number of children = " + children.size());
 
         int count = 0;
+        boolean diffDetected = false;
         for (WebElement child : children) {
             String labelText = child.getText();
             System.err.println("child: " + child.getText());
             boolean checkLabel = labelText.equals(answerLabels[count++]);
-            System.err.println("... checkLabel: " + checkLabel);
+            //System.err.println("... checkLabel: " + checkLabel);
+            if (!checkLabel) {
+                diffDetected = true;
+            }
         }
+        System.err.println("diff detected: " + diffDetected);
 
         // Close the browser
-        //driver.close();
+        driver.close();
+    }
+
+    public void sendMail(String msgParam) {
+        String msg = Optional.ofNullable(msgParam).orElse("Default message");
+
+        // Setup mail server
+        properties.setProperty("mail.smtp.host", host);
+
+        try {
+            // Create a default MimeMessage object.
+            MimeMessage message = new MimeMessage(session);
+
+            // Set From: header field of the header.
+            message.setFrom(new InternetAddress(from));
+
+            // Set To: header field of the header.
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+
+            // Set Subject: header field
+            message.setSubject("This is the Subject Line!");
+
+            // Now set the actual message
+            message.setText(msg);
+
+            // Send message
+            Transport.send(message);
+            System.err.println("Sent message successfully: " + msg);
+        } catch (MessagingException mEx) {
+            mEx.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
