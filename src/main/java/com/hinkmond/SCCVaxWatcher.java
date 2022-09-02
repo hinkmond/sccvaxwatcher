@@ -30,9 +30,9 @@ public class SCCVaxWatcher {
     // Mail settings
     /////
     // Recipient's email ID needs to be mentioned.
-    String to = "abcd@gmail.com";
+    String to = "hinkmond@lyriad.com";
     // Sender's email ID needs to be mentioned
-    String from = "web@gmail.com";
+    String from = "sccvaxbot@lyriad.com";
     // Assuming you are sending email from localhost
     String host = "localhost";
     // Get system properties
