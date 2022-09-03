@@ -12,6 +12,9 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +28,9 @@ public class SCCVaxWatcher {
             "I would like to schedule a COVID-19 BOOSTER shot.*",
             "I am moderately to severely immunocompromised and I would like to schedule an additional dose to complete my initial series.**"
     };
+
+    String msmtpMailSubj = "printf 'Subject: TEST (Please delete)\\n\\n";
+    String msmtpMailCmd = "' | /opt/homebrew/bin/msmtp -a default thewongs@lyriad.com 4087182577@txt.att.net";
 
     /////
     // Mail settings
@@ -72,6 +78,11 @@ public class SCCVaxWatcher {
         }
         System.err.println("diff detected: " + diffDetected);
 
+        //diffDetected = true;
+        if (diffDetected) {
+            sendMail("VAX choices have changed.");
+        }
+
         // Close the browser
         driver.close();
     }
@@ -99,8 +110,26 @@ public class SCCVaxWatcher {
             message.setText(msg);
 
             // Send message
-            Transport.send(message);
-            System.err.println("Sent message successfully: " + msg);
+            //Transport.send(message);
+            Runtime rt = Runtime.getRuntime();
+            String execStr = msmtpMailSubj + msg + msmtpMailCmd;
+            //String[] cmd = { "/bin/sh", "-c", "ps -ef | grep export" };
+            String[] cmd = { "/bin/sh", "-c", execStr};
+            try {
+                Process pr = rt.exec(cmd);
+                BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                String line;
+                while((line=input.readLine()) != null) {
+                    System.out.println(line);
+                }
+
+                int exitVal = pr.waitFor();
+                System.out.println("Exited with error code "+exitVal);
+
+            } catch (IOException | InterruptedException exception) {
+                exception.printStackTrace();
+            }
+            System.err.println("Sent message successfully: " + execStr);
         } catch (MessagingException mEx) {
             mEx.printStackTrace();
         }
